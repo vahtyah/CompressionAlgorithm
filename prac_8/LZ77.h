@@ -1,85 +1,83 @@
 ﻿#pragma once
 #include <iostream>
-#include <vector>
 #include <string>
-#include <fstream>
-using namespace std;
 
-struct Node
+// LZ77 encoding function
+std::string encodeLZ77(const std::string& s)
 {
-	int offset;
-	int length;
-	char next;
+    std::string result;
 
-	Node(int of, int le, char ne)
-	{
-		offset = of;
-		length = le;
-		next = ne;
-	}
-};
+    // Keep track of the current position in the input string
+    size_t i = 0;
+    while (i < s.size())
+    {
+        // Search backwards in the input string for the longest matching substring
+        size_t len = 0;
+        size_t offset = 0;
+        for (size_t j = i; j > 0; --j)
+        {
+            size_t k = 0;
+            while (s[i + k] == s[j + k] && k < i - j)
+            {
+                ++k;
+            }
+            if (k > len)
+            {
+                len = k;
+                offset = i - j;
+            }
+        }
 
-vector<Node*> Encode(string original) {
-	vector<Node*> compressed;
+        // Append the matching substring to the result
+        result += '(' + std::to_string(offset) + ',' + std::to_string(len) + ')';
 
-	const int buf_size = 3072;
-	const int preview_size = 1024;
+        // Append any remaining characters to the result
+        i += len;
+        while (i < s.size() && s[i] != s[i - len])
+        {
+            result += s[i];
+            ++i;
+        }
+    }
 
-	int position = 0;
-
-	while (position < original.length() - 1)
-	{
-		int max_index = 0, max_length = 0, cur_index, cur_length;
-		for (int j = max(0, (position - buf_size)); j < position; j++)
-		{
-			cur_index = j, cur_length = 0;
-
-			while (original[cur_index] == original[cur_length + position] && cur_index < min((position + preview_size), (int)original.length()))
-			{
-				cur_index++;
-				cur_length++;
-			}
-
-			if (cur_length > max_length)
-			{
-				max_index = position - j;
-				max_length = cur_length;
-			}
-		}
-
-		position += max_length;
-		compressed.push_back(new Node(max_index, max_length, original[position]));
-		position++;
-	}
-
-	return compressed;
-}
-string Decode(const vector<Node*>& encoded) {
-	std::string original;
-	for (auto& node : encoded)
-	{
-		if (node->length > 0)
-		{
-			int start = original.length() - node->offset;
-			for (int k = 0; k < node->length; k++)
-			{
-				original += original[start + k];
-			}
-		}
-		original += node->next;
-	}
-	return original;
+    return result;
 }
 
-vector<string> split(string str, string delimiter = " ") {
-	size_t pos = 0;
-	string token;
-	vector<string> arr;
-	while ((pos = str.find(delimiter)) != string::npos) {
-		token = str.substr(0, pos);
-		arr.push_back(token);
-		str.erase(0, pos + delimiter.length());
-	}
-	arr.push_back(str);
-	return arr;
+// LZ77 decoding function
+std::string decodeLZ77(const std::string& s)
+{
+    std::string result;
+
+    // Keep track of the current position in the input string
+    size_t i = 0;
+    while (i < s.size())
+    {
+        // Check if the next character is the start of a matching substring
+        if (s[i] == '(')
+        {
+            // Extract the offset and length of the matching substring
+            size_t j = s.find(',', i);
+            size_t offset = std::stoul(s.substr(i + 1, j - i - 1));
+            size_t k = s.find(')', j);
+            size_t len = std::stoul(s.substr(j + 1, k - j - 1));
+
+            // Append the matching substring to the result
+            size_t m = result.size() - offset;
+            for (size_t n = 0; n < len; ++n)
+            {
+                result += result[m + n];
+            }
+
+            // Update the current position
+            i = k + 1;
+        }
+        else
+        {
+            // Append the next character to the result
+            result += s[i];
+            ++i;
+        }
+    }
+
+    return result;
 }

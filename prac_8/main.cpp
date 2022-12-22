@@ -20,27 +20,19 @@ int main() {
 	// Decode the encoded message
 	std::cout << "Decoded message: " << decoded << std::endl << std::endl;
 
-	////LZ77
-	//cout << "LZ77" << endl;
-	//original = "1110100110111001101";
-	//vector<Node*> encoded = Encode(original);
-	//cout << "Adaptive LZ77 code for " << original << " is: ";
-	//for (auto& node : encoded)
-	//	cout << "(" << node->offset << " " << node->length << ") " << node->next << " ";
-
-	//compressed = "0 0 1 1 2 0 2 2 0 6 4 1 8 7";
-	//cout << "\nAdaptive LZ77 decode for " << compressed << " is: ";
-	//vector<Node*> decoded;
-	//vector<string> _split = split(compressed);
-	//for (int i = 0;i < _split.size();)
-	//{
-	//	int offset = stoi(_split[i++]);
-	//	int length = stoi(_split[i++]);
-	//	char next = i >= _split.size() ? ' ' : _split[i++][0];
-	//	decoded.push_back(new Node(offset, length, next));
-	//}
-	//original = Decode(decoded);
-	//cout << original << endl << endl;
+	//LZ77
+	std::cout << "LZ77" << std::endl;
+	// Input string
+	input = "aabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaabcaab";
+	std::cout << "Input: " << input << std::endl;
+	// Encode the input string
+	encoded = encodeLZ77(input);
+	// Encode the encoded message
+	std::cout << "Encoded message: " << encoded << std::endl; // 3A3B3C1D
+	// Decode the input string
+	decoded = decodeLZ77(encoded);
+	// Decode the encoded message
+	std::cout << "Decoded message: " << decoded << std::endl << std::endl;
 
 	////LZ78
 	//cout << "LZ78" << endl;
