@@ -1,38 +1,43 @@
-#pragma once
 #include <iostream>
 #include <string>
-using namespace std;
 
-string CompressRLE(string original) {
-	string compressData;
-	int temp = 1;
-	for (int i = 0; i < original.length(); i++)
-	{
-		if (original[i] == original[i + 1])
-			temp++;
-		else
-		{
-			compressData += to_string(temp);
-			compressData += original[i];
-			temp = 1;
+// RLE encode
+std::string encodeRLE(const std::string& input) {
+	std::string output;
+	char current = input[0];
+	int count = 1;
+	for (size_t i = 1; i < input.size(); i++) {
+		if (input[i] == current) {
+			count++;
+		}
+		else {
+			output += std::to_string(count) + current;
+			current = input[i];
+			count = 1;
 		}
 	}
-	return compressData;
+	output += std::to_string(count) + current;
+	return output;
 }
 
-string DecompressRLE(string compressed) {
-	string original;
-	int num = 0;
-	for (auto c : compressed)
-	{
-		if (isdigit(static_cast<unsigned char>(c)))
-			num = num * 10 + c - '0';
-		else
-		{
-			num += num == 0 ? 2 : 1;
-			while (--num)
-				original += c;
+// RLE decode
+std::string decodeRLE(const std::string& input) {
+	std::string output;
+	for (size_t i = 0; i < input.size(); i++) {
+		if (isdigit(input[i])) {
+			int count = input[i] - '0';
+			i++;
+			while (isdigit(input[i])) {
+				count = count * 10 + input[i] - '0';
+				i++;
+			}
+			for (int j = 0; j < count; j++) {
+				output += input[i];
+			}
+		}
+		else {
+			output += input[i];
 		}
 	}
-	return original;
+	return output;
 }
