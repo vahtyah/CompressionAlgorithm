@@ -7,7 +7,7 @@ std::string encodeLZ77(const std::string& s)
 {
     std::string result;
     // Keep track of the current position in the input string
-    size_t i = 1;
+    size_t i = 0;
     while (i < s.size())
     {
         // Search backwards in the input string for the longest matching substring
