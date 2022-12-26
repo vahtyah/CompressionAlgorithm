@@ -1,166 +1,74 @@
 #pragma once
 #include <iostream>
-#include <string>
+#include <unordered_map>
 #include <vector>
-#include <sstream>
-#include "windows.h"
+#include <string>
+
 using namespace std;
 
-struct NodeLZ78 {
-	int index;
-	string data;
-	NodeLZ78* next;
-};
-void st_Node(NodeLZ78* head, int index, string data) {
-	head->index = index;
-	head->data = data;
-	head->next = NULL;
-}
-void insert_Node(NodeLZ78* head, int index, string data) {
-	NodeLZ78* new_Node = new NodeLZ78;
-	new_Node->index = index;
-	new_Node->data = data;
-	new_Node->next = NULL;
-
-	NodeLZ78* curr = head;
-	while (curr != NULL)
-	{
-		if (curr->next == NULL)
-		{
-			curr->next = new_Node;
-			return;
-		}
-		curr = curr->next;
-	}
-}
-NodeLZ78* search_Node(NodeLZ78* head, string data)
-{
-	NodeLZ78* curr = head;
-	while (curr != NULL)
-	{
-		if (data.compare(curr->data) == 0)
-			return curr;
-		else
-			curr = curr->next;
-	}
-	return NULL;
-}
-NodeLZ78* search_Node(NodeLZ78* head, int index)
-{
-	NodeLZ78* curr = head;
-	while (curr != NULL)
-	{
-		if (index == curr->index)
-			return curr;
-		else
-			curr = curr->next;
-	}
-	return NULL;
-}
-vector <string> split(string str, char delimiter) {
-	vector<string> internal;
-	stringstream ss(str); // Turn the string into a stream.
-	string tok;
-
-	while (getline(ss, tok, delimiter)) {
-		internal.push_back(tok);
-	}
-
-	return internal;
+// Encode a string using the LZ78 algorithm
+string encodeLZ78(string s) {
+    string result;
+    unordered_map<string, int> dict;
+    int dict_size = 0;
+    string p = "";
+    for (char c : s) {
+        string pc = p + c;
+        if (dict.count(pc)) {
+            p = pc;
+        }
+        else {
+            dict[pc] = ++dict_size;
+            result += "(" + to_string(dict[p]) + "," + c + ")";
+            p = "";
+        }
+    }
+    if (!p.empty()) {
+        result += "(" + to_string(dict[p]) + "," + '\0' + ")";
+    }
+    return result;
 }
 
-string LZ78(string input, int option)
-{
-	if (option == 1)
-	{
-		NodeLZ78* dictionary = new NodeLZ78;
-		string word, result;
-		int length, last_seen, index = 1;
+// Decode a string encoded with the LZ78 algorithm
+string decodeLZ78(string input) {
+    // Initialize the dictionary
+    unordered_map<int, string> dictionary;
+    int next_code = 1; // The next code to assign to a new entry in the dictionary
 
-		length = (int)input.length();
-		word = input[0];
-		st_Node(dictionary, 1, word);
-		result += "0," + word;
+    // Initialize the output string
+    string output;
 
-		for (int i = 1; i < length; i++)
-		{
-			string data;
-			data = input[i];
+    // Split the input string into a vector of pairs
+    vector<pair<int, char>> v;
+    int i = 0;
+    while (i < input.size()) {
+        int code = 0;
+        while (i < input.size() && input[i] != ',') {
+            code = code * 10 + (input[i] - '0');
+            i++;
+        }
+        i++; // skip the comma
+        char c = input[i];
+        v.emplace_back(code, c);
+        i++;
+    }
 
-		re_check:
-			NodeLZ78* search = search_Node(dictionary, data);
+    // Decode the vector of pairs
+    for (pair<int, char> p : v) {
+        int code = p.first;
+        char c = p.second;
+        string s;
+        if (code == 0) {
+            s = c;
+        }
+        else {
+            s = dictionary[code] + c;
+        }
+        output += s;
+        if (c != '\0') {
+            dictionary[next_code++] = s;
+        }
+    }
 
-			if (search)
-			{
-				i++;
-				data += input[i];
-				last_seen = search->index;
-				goto re_check;
-			}
-			else
-			{
-				char zero;
-				if (input[i] == ' ')
-					zero = '0';
-				else
-					zero = input[i];
-
-				if ((int)data.length() < 2)
-					result += " " + to_string(0) + "," + zero;
-				else
-					result += " " + to_string(last_seen) + "," + zero;
-
-				index++;
-				if (i != length)
-					insert_Node(dictionary, index, data);
-			}
-		}
-
-		return result;
-	}
-	if (option == 2)
-	{
-		NodeLZ78* dictionary = new NodeLZ78;
-		string result;
-
-		vector <string> s_input = split(input, ' ');
-		int zz = 2;
-		for (int i = 0; i < s_input.size(); i++)
-		{
-			vector <string> ss_input = split(s_input[i], ',');
-
-			if (i == 0)
-			{
-				st_Node(dictionary, 1, ss_input[1]);
-				result += ss_input[1];
-			}
-			else
-			{
-				NodeLZ78* serched;
-				string get_search = ss_input[1];
-				serched = search_Node(dictionary, stoi(ss_input[0]));
-				if (serched)
-				{
-					result += serched->data + get_search;
-					get_search = serched->data + split(s_input[i], ',')[1];
-					insert_Node(dictionary, zz, get_search);
-				}
-				else
-				{
-					if (stoi(ss_input[0]) == 0)
-						insert_Node(dictionary, zz, get_search);
-					else
-						insert_Node(dictionary, zz, get_search);
-
-					result += get_search;
-				}
-				zz++;
-			}
-		}
-
-		if (result[(int)result.length() - 1] == '0')
-			result = result.substr(0, result.size() - 1);
-
-		return result;
-	}
+    return output;
 }

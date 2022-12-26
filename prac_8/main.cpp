@@ -34,13 +34,20 @@ int main() {
 	// Decode the encoded message
 	std::cout << "Decoded message: " << decoded << std::endl << std::endl;
 
-	////LZ78
-	//cout << "LZ78" << endl;
-	//original = "sionsinossionsinos";
-	//compressed = LZ78(original, 1); 
-	//cout << "Adaptive LZ78 code for " << original << " is: " << compressed << endl;
-	//original = LZ78(compressed,2);
-	//cout << "Adaptive LZ78 decode for " << compressed << " is: " << original << endl << endl;
+	//LZ78
+	cout << "LZ78" << endl;
+	//// Input string
+	//input = "sionsinossionsinos";
+	//std::cout << "Input: " << input << std::endl;
+	//// Encode the input string
+	//encoded = encodeLZ78(input);
+	//// Encode the encoded message
+	//std::cout << "Encoded message: " << encoded << std::endl; // 3A3B3C1D
+	//// Decode the input string
+	encoded = "(0,s)(0,i)(1,o)(1,n)(2,s)(2,i)(2,n)(3,o)(3,s)(4,i)(4,o)(4,n)(4,s)(5,i)(5,o)(5,n)(5,o)(6,s)(6,i)(6,o)(6,n)(6,o)(6,s)";
+	decoded = decodeLZ78(encoded);
+	// Decode the encoded message
+	std::cout << "Decoded message: " << decoded << std::endl << std::endl;
 
 	////Shannon Fano
 	//cout << "Shannon Fano" << endl;
